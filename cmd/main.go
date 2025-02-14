@@ -9,6 +9,7 @@ import (
 	"github.com/vet-clinic-back/metrics-service/internal/repository/postgres"
 	"github.com/vet-clinic-back/metrics-service/internal/usecase"
 
+	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/vet-clinic-back/metrics-service/docs"
 
 	"github.com/gin-gonic/gin"
