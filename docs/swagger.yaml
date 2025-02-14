@@ -1,0 +1,48 @@
+basePath: /
+definitions:
+  handler.MetricsResponse:
+    properties:
+      chest_expansion:
+        type: number
+      muscle_activity:
+        type: number
+      pulse:
+        type: number
+      temperature:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@healthmetrics.com
+    name: API Support
+  description: API for health monitoring system
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Health Metrics API
+  version: "1.0"
+paths:
+  /metrics:
+    get:
+      consumes:
+      - application/json
+      description: Get latest health metrics from sensors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MetricsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get latest metrics
+      tags:
+      - metrics
+swagger: "2.0"

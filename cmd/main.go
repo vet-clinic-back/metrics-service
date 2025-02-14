@@ -1,85 +1,85 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v4"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"github.com/vet-clinic-back/metrics-service/internal/delivery/http"
+	"github.com/vet-clinic-back/metrics-service/internal/config"
+	"github.com/vet-clinic-back/metrics-service/internal/handler"
 	"github.com/vet-clinic-back/metrics-service/internal/repository/postgres"
 	"github.com/vet-clinic-back/metrics-service/internal/usecase"
+
+	_ "github.com/vet-clinic-back/metrics-service/docs"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func initConfig() error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("config")
-	return viper.ReadInConfig()
-}
+// @title Health Metrics API
+// @version 1.0
+// @description API for health monitoring system
+// @termsOfService http://swagger.io/terms/
 
+// @contact.name API Support
+// @contact.email support@healthmetrics.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
 func main() {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
-	if err := initConfig(); err != nil {
-		logger.Fatalf("Error reading config: %s", err)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		logger.Fatal("Config error:", err)
 	}
 
-	// PostgreSQL connection
-	connString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		viper.GetString("postgres.user"),
-		viper.GetString("postgres.password"),
-		viper.GetString("postgres.host"),
-		viper.GetInt("postgres.port"),
-		viper.GetString("postgres.database"),
+	// Database connection
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.SSLMode,
 	)
 
-	conn, err := pgx.Connect(context.Background(), connString)
+	db, err := sql.Open("pgx", connStr)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal("DB connection error:", err)
 	}
-	defer conn.Close(context.Background())
+	defer db.Close()
 
-	// Repository
-	repo := postgres.New(conn, logger)
+	if err = db.Ping(); err != nil {
+		logger.Fatal("DB ping error:", err)
+	}
 
-	// Usecase
-	uc := usecase.New(repo, logger)
+	dbx := sqlx.NewDb(db, "pgx")
+
+	// Repository and UseCase
+	repo := postgres.NewSensorDataRepo(dbx)
+	uc := usecase.NewSensorDataUseCase(repo)
+
+	// TCP Server
+	tcpHandler := handler.NewTCPHandler(uc, logger)
+	go func() {
+		if err := tcpHandler.Start(cfg.TCP.Addr); err != nil {
+			logger.Fatal("TCP server failed:", err)
+		}
+	}()
 
 	// HTTP Server
 	router := gin.Default()
 
-	// Handlers
-	http.NewHandler(router, uc, logger)
+	// Swagger
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.port")),
-		Handler: router,
-	}
+	httpHandler := handler.NewHTTPHandler(uc, logger)
+	router.GET("/metrics", httpHandler.GetMetrics)
 
-	// Graceful shutdown
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("Server error: %s", err)
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		logger.Fatalf("Server shutdown error: %s", err)
+	if err := router.Run(cfg.HTTP.Addr); err != nil {
+		logger.Fatal("HTTP server failed:", err)
 	}
 }
