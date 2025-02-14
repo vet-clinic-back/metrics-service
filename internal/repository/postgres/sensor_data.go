@@ -1,6 +1,10 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"github.com/vet-clinic-back/metrics-service/internal/entity"
@@ -62,10 +66,20 @@ func (r *SensorDataRepo) GetLatest() (*entity.SensorData, error) {
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query build error: %v", err)
 	}
 
 	var data entity.SensorData
 	err = r.db.Get(&data, query, args...)
-	return &data, err
+
+	// Обработка случая, когда данных нет
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil // Возвращаем nil вместо ошибки
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("query error: %v", err)
+	}
+
+	return &data, nil
 }

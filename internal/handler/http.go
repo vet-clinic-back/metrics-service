@@ -40,6 +40,12 @@ func (h *HTTPHandler) GetMetrics(c *gin.Context) {
 		return
 	}
 
+	// Если данных нет
+	if data == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "no data available"})
+		return
+	}
+
 	response := MetricsResponse{
 		Temperature:    data.Temperature,
 		MuscleActivity: data.ValueMuscleActivity,

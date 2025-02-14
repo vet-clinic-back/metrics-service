@@ -1,6 +1,7 @@
 package entity
 
 type SensorData struct {
+	ID                    int     `json:"id" db:"id"`
 	Value1LoadCell        float64 `json:"value1_load_cell" db:"value1_load_cell"`
 	Value2LoadCell        float64 `json:"value2_load_cell" db:"value2_load_cell"`
 	Voltage1LoadCell      float64 `json:"voltage1_load_cell" db:"voltage1_load_cell"`
