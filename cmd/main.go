@@ -8,14 +8,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/vet-clinic-back/metrics-service/internal/delivery/http"
-	"github.com/vet-clinic-back/metrics-service/internal/repository/clickhouse"
-	"github.com/vet-clinic-back/metrics-service/internal/usecase"
-
-	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/vet-clinic-back/metrics-service/internal/delivery/http"
+	"github.com/vet-clinic-back/metrics-service/internal/repository/postgres"
+	"github.com/vet-clinic-back/metrics-service/internal/usecase"
 )
 
 func initConfig() error {
@@ -33,37 +32,33 @@ func main() {
 		logger.Fatalf("Error reading config: %s", err)
 	}
 
-	// ClickHouse connection
-	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{fmt.Sprintf("%s:%d",
-			viper.GetString("clickhouse.host"),
-			viper.GetInt("clickhouse.port"),
-		)},
-		Auth: clickhouse.Auth{
-			Database: viper.GetString("clickhouse.database"),
-			Username: viper.GetString("clickhouse.user"),
-			Password: viper.GetString("clickhouse.password"),
-		},
-	})
+	// PostgreSQL connection
+	connString := fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		viper.GetString("postgres.user"),
+		viper.GetString("postgres.password"),
+		viper.GetString("postgres.host"),
+		viper.GetInt("postgres.port"),
+		viper.GetString("postgres.database"),
+	)
+
+	conn, err := pgx.Connect(context.Background(), connString)
 	if err != nil {
 		logger.Fatal(err)
 	}
+	defer conn.Close(context.Background())
 
 	// Repository
-	repo := clickhouse.New(conn, logger)
+	repo := postgres.New(conn, logger)
 
 	// Usecase
 	uc := usecase.New(repo, logger)
 
 	// HTTP Server
-	router := gin.New()
-	router.Use(gin.Recovery())
-
-	// Swagger
-	router.GET("/swagger/*any", http.SwaggerHandler())
+	router := gin.Default()
 
 	// Handlers
-	http.NewHttpHandler(router, uc, logger)
+	http.NewHandler(router, uc, logger)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("server.port")),

@@ -1,29 +1,30 @@
-package clickhouse
+package postgres
 
 import (
 	"context"
 
-	"github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/Masterminds/squirrel"
-	"github.com/sirupsen/logrus"
 	"github.com/vet-clinic-back/metrics-service/internal/domain"
+
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 )
 
-type ClickHouseRepo struct {
-	conn    clickhouse.Conn
+type PostgresRepo struct {
+	conn    *pgx.Conn
 	builder squirrel.StatementBuilderType
 	logger  *logrus.Logger
 }
 
-func New(conn clickhouse.Conn, logger *logrus.Logger) *ClickHouseRepo {
-	return &ClickHouseRepo{
+func New(conn *pgx.Conn, logger *logrus.Logger) *PostgresRepo {
+	return &PostgresRepo{
 		conn:    conn,
-		builder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Question),
+		builder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 		logger:  logger,
 	}
 }
 
-func (r *ClickHouseRepo) Save(m *domain.Metric) error {
+func (r *PostgresRepo) Save(m *domain.Metric) error {
 	query, args, err := r.builder.
 		Insert("metrics").
 		Columns(
@@ -47,10 +48,11 @@ func (r *ClickHouseRepo) Save(m *domain.Metric) error {
 		return err
 	}
 
-	return r.conn.AsyncInsert(context.Background(), query, false, args...)
+	_, err = r.conn.Exec(context.Background(), query, args...)
+	return err
 }
 
-func (r *ClickHouseRepo) GetLatest() ([]domain.Metric, error) {
+func (r *PostgresRepo) GetLatest() ([]domain.Metric, error) {
 	query, args, err := r.builder.
 		Select(
 			"temperature",
@@ -60,7 +62,7 @@ func (r *ClickHouseRepo) GetLatest() ([]domain.Metric, error) {
 			"pulse",
 		).
 		From("metrics").
-		OrderBy("timestamp DESC").
+		OrderBy("created_at DESC").
 		Limit(10).
 		ToSql()
 
@@ -77,13 +79,14 @@ func (r *ClickHouseRepo) GetLatest() ([]domain.Metric, error) {
 	var metrics []domain.Metric
 	for rows.Next() {
 		var m domain.Metric
-		if err := rows.Scan(
+		err := rows.Scan(
 			&m.Temperature,
 			&m.MuscleActivity,
 			&m.ChestExpansion1,
 			&m.ChestExpansion2,
 			&m.Pulse,
-		); err != nil {
+		)
+		if err != nil {
 			return nil, err
 		}
 		metrics = append(metrics, m)

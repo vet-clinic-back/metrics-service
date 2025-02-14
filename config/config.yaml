@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+postgres:
+  host: postgres  # имя сервиса из docker-compose
+  port: 5432
+  user: postgres
+  password: postgres
+  database: metrics
