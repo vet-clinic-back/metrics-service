@@ -1,33 +1,29 @@
 version: '3'
+
 services:
   postgres:
     image: postgres:13
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sensor_data
-    networks:  # Добавьте сеть
+    networks:
       - app-net
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/migrations:/docker-entrypoint-initdb.d
 
-  app:  # Ваш микросервис
+  app:
     build: .
+    networks:
+      - app-net
     depends_on:
       - postgres
-    networks:  # Та же сеть
-      - app-net
     ports:
-      - "8080:8080"
-      - "8081:8081"
-    environment:
-      - DB_HOST=postgres  # Используем имя сервиса
+      - "5131:5131"
+      - "5132:5132"
 
-networks:  # Объявляем сеть
+networks:
   app-net:
-
-volumes:
-  postgres_data:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

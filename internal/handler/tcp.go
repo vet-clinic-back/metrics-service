@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net"
 
@@ -10,12 +11,12 @@ import (
 )
 
 type TCPHandler struct {
-	useCase *usecase.SensorDataUseCase
-	log     *logrus.Logger
+	uc  *usecase.SensorDataUseCase
+	log *logrus.Logger
 }
 
 func NewTCPHandler(uc *usecase.SensorDataUseCase, log *logrus.Logger) *TCPHandler {
-	return &TCPHandler{useCase: uc, log: log}
+	return &TCPHandler{uc: uc, log: log}
 }
 
 func (h *TCPHandler) Start(addr string) error {
@@ -40,16 +41,18 @@ func (h *TCPHandler) Start(addr string) error {
 func (h *TCPHandler) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
+	decoder := json.NewDecoder(conn)
 	var data entity.SensorData
-	if err := json.NewDecoder(conn).Decode(&data); err != nil {
-		h.log.Error("JSON decode error:", err)
+
+	if err := decoder.Decode(&data); err != nil {
+		h.log.Error("Decode error:", err)
 		return
 	}
 
-	if err := h.useCase.ProcessData(&data); err != nil {
-		h.log.Error("Process data error:", err)
+	if err := h.uc.ProcessData(context.Background(), &data); err != nil {
+		h.log.Error("Process error:", err)
 		return
 	}
 
-	h.log.Info("Data saved successfully")
+	h.log.Info("Data saved from TCP")
 }

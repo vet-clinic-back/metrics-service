@@ -1,15 +1,13 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	TCP  TCPConfig  `mapstructure:"tcp"`
-	HTTP HTTPConfig `mapstructure:"http"`
-	DB   DBConfig   `mapstructure:"db"`
+	TCP  TCPConfig
+	HTTP HTTPConfig
+	DB   DBConfig
 }
 
 type TCPConfig struct {
@@ -35,21 +33,13 @@ func LoadConfig() (*Config, error) {
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 
-	// Для отладки: список всех считанных ключей
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println("Panic occurred:", err)
-		}
-		fmt.Println("All settings:", viper.AllSettings())
-	}()
-
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("error reading config: %v", err)
+		return nil, err
 	}
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("unmarshal error: %v", err)
+		return nil, err
 	}
 
 	return &cfg, nil

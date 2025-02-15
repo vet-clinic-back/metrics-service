@@ -12,7 +12,7 @@ const docTemplate = `{
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
-            "email": "support@healthmetrics.com"
+            "email": "support@healthmonitor.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/metrics": {
             "get": {
-                "description": "Get latest health metrics from sensors",
+                "description": "Возвращает последние сохраненные показатели датчиков",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,16 +35,72 @@ const docTemplate = `{
                 "tags": [
                     "metrics"
                 ],
-                "summary": "Get latest metrics",
+                "summary": "Получить последние метрики",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Успешный ответ",
                         "schema": {
-                            "$ref": "#/definitions/handler.MetricsResponse"
+                            "$ref": "#/definitions/entity.SensorData"
+                        }
+                    },
+                    "404": {
+                        "description": "Данные не найдены",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Принимает данные с датчиков и сохраняет их в базу данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "metrics"
+                ],
+                "summary": "Сохранить новые метрики",
+                "parameters": [
+                    {
+                        "description": "Данные датчиков",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.SensorData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Данные успешно сохранены"
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сохранения",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -57,19 +113,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.MetricsResponse": {
+        "entity.SensorData": {
             "type": "object",
             "properties": {
-                "chest_expansion": {
-                    "type": "number"
+                "created_at": {
+                    "type": "string"
                 },
-                "muscle_activity": {
-                    "type": "number"
-                },
-                "pulse": {
-                    "type": "number"
+                "id": {
+                    "type": "integer"
                 },
                 "temperature": {
+                    "type": "number"
+                },
+                "value1_load_cell": {
+                    "type": "number"
+                },
+                "value2_load_cell": {
+                    "type": "number"
+                },
+                "value_muscle_activity": {
+                    "type": "number"
+                },
+                "value_pulse": {
+                    "type": "number"
+                },
+                "voltage1_load_cell": {
+                    "type": "number"
+                },
+                "voltage2_load_cell_imag": {
+                    "type": "number"
+                },
+                "voltage2_load_cell_real": {
+                    "type": "number"
+                },
+                "voltage_muscle_activity": {
+                    "type": "number"
+                },
+                "voltage_pulse": {
                     "type": "number"
                 }
             }
@@ -83,8 +163,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Health Metrics API",
-	Description:      "API for health monitoring system",
+	Title:            "Health Monitoring API",
+	Description:      "API для сбора и анализа медицинских показателей",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

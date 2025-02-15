@@ -12,4 +12,5 @@ type SensorData struct {
 	VoltagePulse          float64 `json:"voltage_pulse" db:"voltage_pulse"`
 	ValueMuscleActivity   float64 `json:"value_muscle_activity" db:"value_muscle_activity"`
 	VoltageMuscleActivity float64 `json:"voltage_muscle_activity" db:"voltage_muscle_activity"`
+	CreatedAt             string  `json:"created_at" db:"created_at"`
 }

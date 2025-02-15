@@ -1,9 +1,8 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
-	"errors"
-	"fmt"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -22,7 +21,7 @@ func NewSensorDataRepo(db *sqlx.DB) *SensorDataRepo {
 	}
 }
 
-func (r *SensorDataRepo) Save(data *entity.SensorData) error {
+func (r *SensorDataRepo) Save(ctx context.Context, data *entity.SensorData) error {
 	query, args, err := r.builder.Insert("sensor_data").
 		Columns(
 			"value1_load_cell",
@@ -54,11 +53,11 @@ func (r *SensorDataRepo) Save(data *entity.SensorData) error {
 		return err
 	}
 
-	_, err = r.db.Exec(query, args...)
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
-func (r *SensorDataRepo) GetLatest() (*entity.SensorData, error) {
+func (r *SensorDataRepo) GetLatest(ctx context.Context) (*entity.SensorData, error) {
 	query, args, err := r.builder.Select("*").
 		From("sensor_data").
 		OrderBy("created_at DESC").
@@ -66,20 +65,15 @@ func (r *SensorDataRepo) GetLatest() (*entity.SensorData, error) {
 		ToSql()
 
 	if err != nil {
-		return nil, fmt.Errorf("query build error: %v", err)
+		return nil, err
 	}
 
 	var data entity.SensorData
-	err = r.db.Get(&data, query, args...)
+	err = r.db.GetContext(ctx, &data, query, args...)
 
-	// Обработка случая, когда данных нет
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil // Возвращаем nil вместо ошибки
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("query error: %v", err)
-	}
-
-	return &data, nil
+	return &data, err
 }
