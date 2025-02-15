@@ -1,7 +1,7 @@
 tcp:
-  addr: ":8080"
-http:
   addr: ":8082"
+http:
+  addr: ":8080"
 db:
   host: "postgres"
   port: "5432"
