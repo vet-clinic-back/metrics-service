@@ -5,8 +5,7 @@ services:
     networks: # Та же сеть
       - app-net
     ports:
-      - "8080:8080"
-      - "8082:8082"
+      - "8082:8080"
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
