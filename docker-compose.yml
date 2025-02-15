@@ -2,8 +2,6 @@ version: "3"
 services:
   app: # Ваш микросервис
     build: .
-    depends_on:
-      - postgres
     networks: # Та же сеть
       - app-net
     ports:
