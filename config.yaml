@@ -1,9 +1,11 @@
-
+tcp:
+  addr: ":8081"
+http:
+  addr: ":8080"
 db:
-  host: "postgres"    # Должно совпадать с именем сервиса
+  host: "postgres"  # Или хост вашей существующей БД
   port: "5432"
   user: "postgres"
   password: "postgres"
   dbname: "postgres"
   sslmode: "disable"
-
