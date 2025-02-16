@@ -1,3 +1,4 @@
+
 db:
   host: "postgres"    # Должно совпадать с именем сервиса
   port: "5432"
@@ -5,3 +6,4 @@ db:
   password: "postgres"
   dbname: "postgres"
   sslmode: "disable"
+

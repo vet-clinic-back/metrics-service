@@ -23,7 +23,7 @@ COPY --from=builder /app/main /app/main
 COPY config.yaml /app/config.yaml
 
 # Открываем порты
-EXPOSE 8080 8081
+EXPOSE 8080 8082
 
 # Запускаем приложение
 CMD ["/app/main"]
