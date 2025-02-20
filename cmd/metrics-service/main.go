@@ -1,8 +1,17 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"github.com/vet-clinic-back/metrics-service/internal/adapters"
+	"github.com/vet-clinic-back/metrics-service/internal/config"
+	"github.com/vet-clinic-back/metrics-service/internal/handlers"
+	"github.com/vet-clinic-back/metrics-service/internal/services"
+	"github.com/vet-clinic-back/metrics-service/internal/storages"
 	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -19,4 +28,22 @@ func main() {
 	log := logging.GetLogger().WithField("op", "main")
 	log.Info("starting metrics-service")
 
+	cfg := config.MustConfigure("./config.yaml")
+
+	ad := adapters.NewAdapters(cfg)
+	st := storages.MustNew(ad)
+	srv := services.MustNew(st)
+	h := handlers.New(srv)
+
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+		os.Interrupt,
+	)
+	defer stop()
+
+	h.Run(ctx, ad)
 }

@@ -8,3 +8,12 @@ lint:
 .PHONY: lint-fast
 lint-fast:
 	$(GOLANGCI_LINT) run ./... --fast --config=golangci.yaml
+
+.PHONY: env-test
+env-test:
+	export POSTGRES_HOST=localhost && \
+	export POSTGRES_PORT=5432 && \
+    export POSTGRES_USER=postgres && \
+    export POSTGRES_PASSWORD=postgres && \
+    export POSTGRES_DB=postgres && \
+    echo "Environment variables set"
