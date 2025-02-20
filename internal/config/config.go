@@ -28,7 +28,7 @@ func MustConfigure(configPath string) Config {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	
+
 	err := cleanenv.ReadEnv(config)
 	if err != nil {
 		description, _ := cleanenv.GetDescription(config, nil)
