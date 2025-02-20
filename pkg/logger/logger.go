@@ -23,7 +23,7 @@ func GetLogger() *Logger {
 
 func InitDefaultLogger(opts ...func(*logrus.Logger)) {
 	log := logrus.New()
-	log.SetLevel(logrus.InfoLevel)
+	log.SetLevel(logrus.DebugLevel)
 	log.Formatter = &logrus.JSONFormatter{
 		FieldMap: fieldMap,
 	}
@@ -35,12 +35,24 @@ func InitDefaultLogger(opts ...func(*logrus.Logger)) {
 	entry = logrus.NewEntry(log)
 }
 
-func init() {
-	log := logrus.New()
-	log.Formatter = &logrus.JSONFormatter{
-		FieldMap: fieldMap,
-	}
-	log.SetLevel(logrus.InfoLevel)
+type Flags struct {
+	PrettyLog *bool
+	Release   *bool
+}
 
+func UpdateByFlags(flags Flags) {
+	if flags.PrettyLog != nil && *flags.PrettyLog {
+		UpdateOpts(WithTextFormatter())
+	}
+	if flags.Release != nil && *flags.Release {
+		UpdateOpts(WithDebug())
+	}
+}
+
+func UpdateOpts(opts ...func(*logrus.Logger)) {
+	log := GetLogger().Logger
+	for _, opt := range opts {
+		opt(log)
+	}
 	entry = logrus.NewEntry(log)
 }

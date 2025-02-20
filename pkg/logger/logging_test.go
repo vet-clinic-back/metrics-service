@@ -1,18 +1,21 @@
-package logging
+package logging_test
 
-import "testing"
+import (
+	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
+	"testing"
+)
 
 func TestLoggerOpts(t *testing.T) {
-	GetLogger().WithField("test", t.Name()).Debug("test debug")
-	GetLogger().WithField("test", t.Name()).Info("test info")
+	logging.GetLogger().WithField("test", t.Name()).Debug("test debug")
+	logging.GetLogger().WithField("test", t.Name()).Info("test info")
 
-	InitDefaultLogger(WithDebug())
+	logging.InitDefaultLogger(logging.WithDebug())
 
-	GetLogger().WithField("test", t.Name()).Debug("test debug 2")
+	logging.GetLogger().WithField("test", t.Name()).Debug("test debug 2")
 
-	InitDefaultLogger(WithDebug(), WithTextFormatter())
-	GetLogger().WithField("test", t.Name()).Debug("test debug 3")
+	logging.InitDefaultLogger(logging.WithDebug(), logging.WithTextFormatter())
+	logging.GetLogger().WithField("test", t.Name()).Debug("test debug 3")
 
-	InitDefaultLogger(WithDebug())
-	GetLogger().WithField("test", t.Name()).Debug("test debug 3")
+	logging.InitDefaultLogger(logging.WithDebug())
+	logging.GetLogger().WithField("test", t.Name()).Debug("test debug 3")
 }
