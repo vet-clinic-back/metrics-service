@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/vet-clinic-back/metrics-service/internal/adapters"
+	"github.com/vet-clinic-back/metrics-service/internal/domains"
 	"github.com/vet-clinic-back/metrics-service/internal/services"
 	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 	"golang.org/x/sync/errgroup"
@@ -27,7 +28,12 @@ func (h *Handler) Run(ctx context.Context, a *adapters.Adapters) {
 	tCtx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	g, _ := errgroup.WithContext(ctx)
+	g, ctx := errgroup.WithContext(ctx)
+
+	_, err := h.service.Metrics.GetMetrics(ctx, domains.MetricsFilters{Interval: "minute"})
+	if err != nil {
+		log.WithError(err).Error("Error getting metrics")
+	}
 
 	// g.Go(func() error {
 	// 	<-gCtx.Done()
