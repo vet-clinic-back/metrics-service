@@ -28,7 +28,7 @@ func main() {
 	log := logging.GetLogger().WithField("op", "main")
 	log.Info("starting metrics-service")
 
-	cfg := config.MustConfigure("./config.yaml")
+	cfg := config.MustConfigure()
 
 	ad := adapters.NewAdapters(cfg)
 	st := storages.MustNew(ad)

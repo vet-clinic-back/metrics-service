@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/vet-clinic-back/metrics-service/internal/domains"
-	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 )
 
 /*
@@ -24,7 +23,7 @@ created_at BIGINT DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT
 
 func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]domains.Metrics, error) {
 	sq := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
+	// log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
 
 	dateTrunc := fmt.Sprintf("DATE_TRUNC('%s', TO_TIMESTAMP(created_at / 1000))", f.Interval)
 
@@ -40,7 +39,6 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 		From("metrics").
 		Where(squirrel.Eq{"device_id": f.DeviceID}).
 		GroupBy("time_group")
-
 	if f.ToDate != 0 {
 		query = query.Where(squirrel.LtOrEq{"created_at": f.ToDate})
 	}
@@ -48,15 +46,15 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 		query = query.Where(squirrel.GtOrEq{"created_at": f.FromDate})
 	}
 
-	sql, args, err := query.ToSql()
+	sqlQuery, args, err := query.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
-	log.WithField("query", sql).Debug("get metrics query")
+	// log.WithField("query", sqlQuery).Debug("get metrics query")
 
-	rows, err := p.db.Query(sql, args...)
-	if err != nil {
+	rows, err := p.db.QueryContext(ctx, sqlQuery, args...)
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()

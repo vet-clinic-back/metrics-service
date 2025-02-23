@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Postgres Postgres `yaml:"postgres"`
+	HTTPConfig HTTPConfig
+	Postgres   Postgres
 }
 
 type Postgres struct {
@@ -19,9 +20,13 @@ type Postgres struct {
 	Database string `env:"POSTGRES_DB" validate:"required"`
 }
 
+type HTTPConfig struct {
+	Port         string   `yaml:"METRICS_HTTP_PORT" env-default:"8080"`
+	AllowOrigins []string `env:"METRICS_ALLOW_ORIGINS"`
+}
+
 // MustConfigure is a configurator for a config.
-// @params: configPath is a path to config. is used by tests from any package with configuration.
-func MustConfigure(configPath string) Config {
+func MustConfigure() Config {
 	config := &Config{}
 	log := logging.GetLogger().WithField("op", "config.MustConfigure")
 

@@ -11,7 +11,8 @@ func (p *Postgres) InsertMetrics(ctx context.Context, metrics domains.Metrics) e
 		"device_id)" +
 		"VALUES ($1, $2, $3, $4, $5, $6, $7)"
 
-	_, err := p.db.Exec(
+	_, err := p.db.ExecContext(
+		ctx,
 		q,
 		metrics.Pulse, metrics.Temperature, metrics.LoadCell.Output1, metrics.LoadCell.Output2,
 		metrics.MuscleActivity.Output1, metrics.MuscleActivity.Output2, metrics.DeviceID,

@@ -1,0 +1,2 @@
+GET {{host}}/metrics?interval=minute&device_id=100500
+Accept: application/json

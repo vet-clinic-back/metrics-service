@@ -24,5 +24,5 @@ type MetricsFilters struct {
 	FromDate uint    `json:"from_date"` // Unix Milliseconds
 	ToDate   uint    `json:"to_date"`   // Unix Milliseconds
 	Interval string  `json:"interval" validate:"required,oneof=minute hour day week"`
-	DeviceID *uint64 `json:"device_id"`
+	DeviceID *uint64 `json:"device_id" validate:"required"`
 }
