@@ -1,6 +1,7 @@
 # metrics-service
 
 ## TODO
+- [X] Return metrics on get request
 - [ ] Receive metrics
 - [ ] Put metrics to database
 
