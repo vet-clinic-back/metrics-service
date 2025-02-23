@@ -21,5 +21,10 @@ func (m *MetricService) GetMetrics(ctx context.Context, filters domains.MetricsF
 	if filters.Interval == "" {
 		return []domains.Metrics{}, ErrNoInterval
 	}
+
+	if filters.DeviceID == nil {
+		return []domains.Metrics{}, ErrNoDeviceID
+	}
+
 	return m.storage.MetricStorage.GetMetrics(ctx, filters)
 }

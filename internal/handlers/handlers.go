@@ -29,11 +29,37 @@ func (h *Handler) Run(ctx context.Context, a *adapters.Adapters) {
 	defer cancel()
 
 	g, ctx := errgroup.WithContext(ctx)
-
-	_, err := h.service.Metrics.GetMetrics(ctx, domains.MetricsFilters{Interval: "minute"})
+	var deviceID uint64 = 100500
+	m, err := h.service.Metrics.GetMetrics(ctx, domains.MetricsFilters{
+		Interval: "minute",
+		DeviceID: &deviceID,
+	})
 	if err != nil {
 		log.WithError(err).Error("Error getting metrics")
 	}
+
+	for _, m := range m {
+		log.WithField("metric", m).Info("got metrics")
+	}
+
+	//insertMetrics := domains.Metrics{
+	//	DeviceID:    100500,
+	//	Pulse:       50,
+	//	Temperature: 36.6,
+	//	LoadCell: domains.LoadCell{
+	//		Output1: 22.3,
+	//		Output2: 22.3,
+	//	},
+	//	MuscleActivity: domains.MuscleActivity{
+	//		Output1: 52.2,
+	//		Output2: 48,
+	//	},
+	//}
+	//err = h.service.Metrics.InsertMetrics(ctx, insertMetrics)
+	//if err != nil {
+	//	log.WithError(err).Error("Error metrics insert")
+	//}
+	//log.Debug("metrics inserted")
 
 	// g.Go(func() error {
 	// 	<-gCtx.Done()

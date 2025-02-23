@@ -6,7 +6,6 @@ import (
 )
 
 func (p *Postgres) InsertMetrics(ctx context.Context, metrics domains.Metrics) error {
-
 	q := "INSERT INTO metrics" +
 		"(pulse, temperature, loadcell_output1, loadcell_output2, muscleactivity_output1, muscleactivity_output2," +
 		"device_id)" +

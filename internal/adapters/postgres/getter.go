@@ -38,7 +38,7 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 		"AVG(muscleactivity_output2) AS m_act_o2_avg",
 	).
 		From("metrics").
-		Where(squirrel.Eq{"id": f.DeviceID}).
+		Where(squirrel.Eq{"device_id": f.DeviceID}).
 		GroupBy("time_group")
 
 	if f.ToDate != 0 {
