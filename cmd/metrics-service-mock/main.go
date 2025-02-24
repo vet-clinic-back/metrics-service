@@ -7,6 +7,7 @@ import (
 	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func startMockClient() {
 	for i := 0; i < 50; i++ {
 		metrics := domains.Metrics{
 			ID:          uint64(i + 1),
-			DeviceID:    100500,
+			DeviceID:    100500 + uint64(i),
 			Pulse:       rand.Float64() * 100,
 			Temperature: 36.0 + rand.Float64()*2,
 			LoadCell: domains.LoadCell{
@@ -62,5 +63,10 @@ func main() {
 	logging.InitDefaultLogger()
 	logging.UpdateByFlags(logging.Flags{PrettyLog: prettyLog, Release: release})
 
-	startMockClient()
+	var wg sync.WaitGroup
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go startMockClient()
+	}
+	wg.Wait()
 }
