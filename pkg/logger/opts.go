@@ -8,6 +8,12 @@ func WithDebug() func(*logrus.Logger) {
 	}
 }
 
+func WithInfo() func(*logrus.Logger) {
+	return func(l *logrus.Logger) {
+		l.SetLevel(logrus.InfoLevel)
+	}
+}
+
 func WithTextFormatter() func(*logrus.Logger) {
 	return func(l *logrus.Logger) {
 		l.SetFormatter(&logrus.TextFormatter{

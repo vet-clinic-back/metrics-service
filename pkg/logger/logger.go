@@ -45,7 +45,7 @@ func UpdateByFlags(flags Flags) {
 		UpdateOpts(WithTextFormatter())
 	}
 	if flags.Release != nil && *flags.Release {
-		UpdateOpts(WithDebug())
+		UpdateOpts(WithInfo())
 	}
 }
 
