@@ -1,6 +1,6 @@
 # metrics-service
 
-**ENV** vars you can see here. And check it here. They should be the same.
+**ENV** vars you can see [here](.env.example). And check it [here](https://github.com/vet-clinic-back/project-setup-props/blob/main/.env).
 
 ## INPUT TCP DTO
 
