@@ -21,8 +21,9 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 	if deviceID := c.Query("device_id"); deviceID != "" {
 		uint64Value, err := strconv.ParseUint(deviceID, 10, 64)
 		if err != nil {
-			log.Error("Could not parse device id from query string")
-			c.Status(http.StatusBadRequest) // fixme
+			msg := "Could not parse device id from query string"
+			log.WithError(err).Error(msg)
+			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
 			return
 		}
 		filters.DeviceID = &uint64Value
@@ -31,8 +32,9 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 	if fromDate := c.Query("from_date"); fromDate != "" {
 		uint64Value, err := strconv.ParseUint(fromDate, 10, 64)
 		if err != nil {
-			log.Error("Could not parse from_date from query string")
-			c.Status(http.StatusBadRequest) // fixme
+			msg := "Could not parse from_date from query string"
+			log.WithError(err).Error(msg)
+			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
 			return
 		}
 		uintValue := uint(uint64Value)
@@ -42,8 +44,9 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 	if toDate := c.Query("to_date"); toDate != "" {
 		uint64Value, err := strconv.ParseUint(toDate, 10, 64)
 		if err != nil {
-			log.Error("Could not parse to_date from query string")
-			c.Status(http.StatusBadRequest) // fixme
+			msg := "Could not parse to_date from query string"
+			log.WithError(err).Error(msg)
+			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
 			return
 		}
 		uintValue := uint(uint64Value)
@@ -52,7 +55,7 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 
 	if err := validator.New().Struct(&filters); err != nil {
 		log.WithError(err).Error("Error validating query")
-		c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: "Error validating query"}) // fixme
+		c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: "query validation failed"})
 		return
 	}
 
