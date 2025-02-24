@@ -10,6 +10,7 @@ import (
 type Config struct {
 	HTTPConfig HTTPConfig
 	Postgres   Postgres
+	TCPConfig  TCPConfig
 }
 
 type Postgres struct {
@@ -21,8 +22,12 @@ type Postgres struct {
 }
 
 type HTTPConfig struct {
-	Port         string   `yaml:"METRICS_HTTP_PORT" env-default:"8080"`
+	Port         string   `env:"METRICS_HTTP_PORT" env-default:"8080"`
 	AllowOrigins []string `env:"METRICS_ALLOW_ORIGINS"`
+}
+
+type TCPConfig struct {
+	Port string `env:"METRICS_TCP_LISTEN_PORT" env-default:"8080"`
 }
 
 // MustConfigure is a configurator for a config.

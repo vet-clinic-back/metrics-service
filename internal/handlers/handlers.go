@@ -23,8 +23,11 @@ func New(s *services.Service) *Handler {
 func (h *Handler) Run(ctx context.Context, a *adapters.Adapters) {
 	log := logging.GetLogger().WithField("op", "app.Run")
 
-	go a.HTTPAdapter.SetHandlers(h)
+	a.HTTPAdapter.SetHandlers(h)
+	a.TCPAdapter.SetHandler(h)
+
 	go a.HTTPAdapter.MustRun()
+	go a.TCPAdapter.Listen()
 
 	// graceful shutdown
 	g, gCtx := errgroup.WithContext(ctx)
