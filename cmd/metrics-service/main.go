@@ -19,6 +19,15 @@ var (
 	release   = flag.Bool("release", false, "set logger to info level")
 )
 
+//  @title      Vet clinic metrics service
+//  @version    0.1
+//  @description  metrics service
+
+//  @BasePath  /
+
+// @securityDefinitions.apikey  ApiKeyAuth
+// @in              header
+// @name            Authorization
 func main() {
 	flag.Parse()
 

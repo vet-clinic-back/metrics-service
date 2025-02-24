@@ -1,5 +1,10 @@
 GOLANGCI_LINT = $(HOME)/bin/golangci-lint
 
+.PHONY: update-swagger
+update-swagger:
+	swag init -g ./cmd/metrics-service/main.go -o docs
+
+
 .PHONY: lint
 lint:
 	### RUN GOLANGCI-LINT ###

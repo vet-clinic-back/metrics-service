@@ -1,0 +1,109 @@
+basePath: /
+definitions:
+  domains.ErrorBody:
+    properties:
+      message:
+        type: string
+    type: object
+  domains.LoadCell:
+    properties:
+      output1:
+        type: number
+      output2:
+        type: number
+    type: object
+  domains.Metrics:
+    properties:
+      device_id:
+        type: integer
+      id:
+        type: integer
+      load_cell:
+        allOf:
+        - $ref: '#/definitions/domains.LoadCell'
+        description: Тензодатчик
+      muscle_activity:
+        $ref: '#/definitions/domains.MuscleActivity'
+      pulse:
+        type: number
+      temperature:
+        type: number
+      timestamp:
+        type: string
+    required:
+    - device_id
+    type: object
+  domains.MuscleActivity:
+    properties:
+      output1:
+        type: number
+      output2:
+        type: number
+    type: object
+  domains.SuccessGet:
+    properties:
+      result:
+        items:
+          $ref: '#/definitions/domains.Metrics'
+        type: array
+    type: object
+info:
+  contact: {}
+  description: metrics service
+  title: Vet clinic metrics service
+  version: "0.1"
+paths:
+  /metrics:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Получение метрик по фильтрам (временной интервал, ID устройства и т. д.).
+        ОБЯЗАТЕЛЬНО юзать device_id и interval
+      parameters:
+      - description: Интервал ('minute hour day week')
+        example: '"minute"'
+        in: query
+        name: interval
+        required: true
+        type: string
+      - description: ID устройства
+        example: 100500
+        in: query
+        name: device_id
+        required: true
+        type: integer
+      - description: Дата начала (timestamp в milliseconds)
+        example: 1708700000000
+        in: query
+        name: from_date
+        type: integer
+      - description: Дата окончания (timestamp в milliseconds)
+        example: 1708790000000
+        in: query
+        name: to_date
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/domains.SuccessGet'
+        "400":
+          description: Ошибка валидации запроса
+          schema:
+            $ref: '#/definitions/domains.ErrorBody'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/domains.ErrorBody'
+      summary: Получить метрики
+      tags:
+      - metrics
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -11,6 +11,21 @@ import (
 	"strconv"
 )
 
+// GetMetrics return metrics by using filters
+// @Summary Получить метрики
+// @Description Получение метрик по фильтрам (временной интервал, ID устройства и т. д.).
+// @Description ОБЯЗАТЕЛЬНО юзать device_id и interval
+// @Tags metrics
+// @Accept  json
+// @Produce  json
+// @Param interval query string true "Интервал ('minute hour day week')" example("minute")
+// @Param device_id query int true "ID устройства" example(100500)
+// @Param from_date query int false "Дата начала (timestamp в milliseconds)" example(1708700000000)
+// @Param to_date query int false "Дата окончания (timestamp в milliseconds)" example(1708790000000)
+// @Success 200 {object} domains.SuccessGet "Успешный ответ"
+// @Failure 400 {object} domains.ErrorBody "Ошибка валидации запроса"
+// @Failure 500 {object} domains.ErrorBody "Внутренняя ошибка сервера"
+// @Router /metrics [get]
 func (h *Handler) GetMetrics(c *gin.Context) {
 	log := logging.GetLogger().WithField("op", "Handler.GetMetrics")
 	log.Info("Request received. GetMetrics")
@@ -70,7 +85,7 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: "no interval"})
 			return
 		}
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, domains.ErrorBody{Message: "internal server error"})
 		return
 	}
 
