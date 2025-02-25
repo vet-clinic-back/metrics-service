@@ -6,7 +6,6 @@
 
 ```json lines
 {
-  "id": 1,
   "device_id": 12345,
   "pulse": 72.5,
   "temperature": 36.6,
@@ -17,14 +16,13 @@
   "MuscleActivity": {
     "output1": 5.8,
     "output2": 6.1
-  },
-  "timestamp": "2025-02-24T12:34:56Z" // i will
+  }
 }
 
 ```
 
 ## TODO
-- [ ] Change metrics time.
+- [X] Change metrics time.
 - [X] Return metrics on get request
 - [X] Receive metrics
 - [X] Put metrics to database
