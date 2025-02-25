@@ -27,7 +27,7 @@ var (
 
 // @securityDefinitions.apikey  ApiKeyAuth
 // @in              header
-// @name            Authorization
+// @name            Authorization.
 func main() {
 	flag.Parse()
 

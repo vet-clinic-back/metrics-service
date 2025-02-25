@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/lib/pq" // postgres
 	"github.com/vet-clinic-back/metrics-service/internal/config"
@@ -27,15 +26,12 @@ func MustNew(cfg config.Postgres) *Postgres {
 
 	pg := &Postgres{connStr: connStr}
 
-	if err := pg.EnsureConnection(); err != nil {
-		log := logging.GetLogger().WithField("op", "postgres.MustNew")
-		log.WithError(err).Fatal("failed to connect to postgres")
-	}
+	pg.MustEnsureConn()
 
 	return pg
 }
 
-func (p *Postgres) EnsureConnection() error {
+func (p *Postgres) MustEnsureConn() {
 	log := logging.GetLogger().WithField("op", "Postgres.Reconnect")
 
 	shouldConnect := true
@@ -50,7 +46,7 @@ func (p *Postgres) EnsureConnection() error {
 	}
 
 	if !shouldConnect {
-		return nil
+		return
 	}
 	for i := 0; i < maxTries; i++ {
 		db, err := sql.Open("postgres", p.connStr)
@@ -66,10 +62,10 @@ func (p *Postgres) EnsureConnection() error {
 		} else {
 			p.db = db
 			log.Infof("Connected to postgres by %v try", i+1)
-			return nil
+			return
 		}
 	}
-	return errors.New("failed to connect to postgres")
+	log.Fatal("failed to connect to postgres")
 }
 
 func (p *Postgres) Shutdown(ctx context.Context) error {

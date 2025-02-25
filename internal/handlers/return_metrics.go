@@ -25,7 +25,7 @@ import (
 // @Success 200 {object} domains.SuccessGet "Успешный ответ"
 // @Failure 400 {object} domains.ErrorBody "Ошибка валидации запроса"
 // @Failure 500 {object} domains.ErrorBody "Внутренняя ошибка сервера"
-// @Router /metrics [get]
+// @Router /metrics [get].
 func (h *Handler) GetMetrics(c *gin.Context) {
 	log := logging.GetLogger().WithField("op", "Handler.GetMetrics")
 	log.Info("Request received. GetMetrics")

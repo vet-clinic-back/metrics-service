@@ -64,8 +64,9 @@ func main() {
 	logging.UpdateByFlags(logging.Flags{PrettyLog: prettyLog, Release: release})
 
 	var wg sync.WaitGroup
-	wg.Add(5)
-	for i := 0; i < 5; i++ {
+	tries := 5
+	wg.Add(tries)
+	for i := 0; i < tries; i++ {
 		go startMockClient()
 	}
 	wg.Wait()

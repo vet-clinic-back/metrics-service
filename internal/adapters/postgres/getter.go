@@ -22,6 +22,7 @@ created_at BIGINT DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT
 */
 
 func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]domains.Metrics, error) {
+	p.MustEnsureConn()
 	sq := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	// log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
 
