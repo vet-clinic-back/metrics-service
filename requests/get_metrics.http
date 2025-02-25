@@ -1,2 +1,2 @@
-GET {{host}}/metrics?interval=hour&device_id=100500
+GET {{host}}/metrics?interval=minute&device_id=100500&from_date=2006-01-02T15:04:05%2B07:00
 Accept: application/json

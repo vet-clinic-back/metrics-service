@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 )
 
@@ -35,9 +34,9 @@ func MustConfigure() Config {
 	config := &Config{}
 	log := logging.GetLogger().WithField("op", "config.MustConfigure")
 
-	if err := godotenv.Load(); err != nil {
-		log.Error("Error loading .env file!!!! Dont panic for production")
-	}
+	//if err := godotenv.Load(); err != nil {
+	//	log.Error("Error loading .env file!!!! Dont panic for production")
+	//}
 
 	err := cleanenv.ReadEnv(config)
 	if err != nil {

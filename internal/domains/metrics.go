@@ -1,5 +1,7 @@
 package domains
 
+import "time"
+
 type Metrics struct {
 	ID             uint64         `json:"id"`
 	DeviceID       uint64         `json:"device_id" validate:"required"`
@@ -7,7 +9,7 @@ type Metrics struct {
 	Temperature    float64        `json:"temperature"`
 	LoadCell       LoadCell       `json:"load_cell"` // Тензодатчик
 	MuscleActivity MuscleActivity `json:"muscle_activity"`
-	Timestamp      string         `json:"timestamp"`
+	Timestamp      time.Time      `json:"timestamp"`
 }
 
 type LoadCell struct {
@@ -21,8 +23,8 @@ type MuscleActivity struct {
 }
 
 type MetricsFilters struct {
-	FromDate uint    `json:"from_date"` // Unix Milliseconds
-	ToDate   uint    `json:"to_date"`   // Unix Milliseconds
-	Interval string  `json:"interval" validate:"required,oneof=minute hour day week"`
-	DeviceID *uint64 `json:"device_id" validate:"required"`
+	FromDate time.Time `json:"from_date"` // Unix Milliseconds
+	ToDate   time.Time `json:"to_date"`   // Unix Milliseconds
+	Interval string    `json:"interval" validate:"required,oneof=minute hour day week"`
+	DeviceID *uint64   `json:"device_id" validate:"required"`
 }

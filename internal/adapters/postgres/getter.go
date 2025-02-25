@@ -29,7 +29,7 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 	sq := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
 
-	dateTrunc := fmt.Sprintf("DATE_TRUNC('%s', TO_TIMESTAMP(created_at / 1000))", f.Interval)
+	dateTrunc := fmt.Sprintf("DATE_TRUNC('%s', created_at)", f.Interval)
 
 	query := sq.Select(
 		dateTrunc+" AS time_group",
@@ -43,10 +43,10 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 		From("metrics").
 		Where(squirrel.Eq{"device_id": f.DeviceID}).
 		GroupBy("time_group")
-	if f.ToDate != 0 {
+	if !f.ToDate.IsZero() {
 		query = query.Where(squirrel.LtOrEq{"created_at": f.ToDate})
 	}
-	if f.FromDate != 0 {
+	if !f.FromDate.IsZero() {
 		query = query.Where(squirrel.GtOrEq{"created_at": f.FromDate})
 	}
 
@@ -55,11 +55,13 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 		return nil, err
 	}
 
-	// log.WithField("query", sqlQuery).Debug("get metrics query")
+	log.WithField("query", sqlQuery).Debug("get metrics query")
 
 	rows, err := p.db.QueryContext(ctx, sqlQuery, args...)
-	if err != nil || rows.Err() != nil {
+	if err != nil {
 		return nil, err
+	} else if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 	defer func(rows *sql.Rows) {
 		err := rows.Close()

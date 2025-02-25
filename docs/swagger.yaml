@@ -73,16 +73,16 @@ paths:
         name: device_id
         required: true
         type: integer
-      - description: Дата начала (timestamp в milliseconds)
-        example: 1708700000000
+      - description: Дата начала (time.RFC3339)
+        example: "2006-01-02T15:04:05Z"
         in: query
         name: from_date
-        type: integer
-      - description: Дата окончания (timestamp в milliseconds)
-        example: 1708790000000
+        type: string
+      - description: Дата окончания (time.RFC3339)
+        example: "2006-01-02T15:04:05Z"
         in: query
         name: to_date
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -104,6 +104,6 @@ paths:
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: Authorization
+    name: Authorization.
     type: apiKey
 swagger: "2.0"

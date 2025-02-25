@@ -9,6 +9,7 @@ import (
 	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // GetMetrics return metrics by using filters
@@ -20,8 +21,8 @@ import (
 // @Produce  json
 // @Param interval query string true "Интервал ('minute hour day week')" example("minute")
 // @Param device_id query int true "ID устройства" example(100500)
-// @Param from_date query int false "Дата начала (timestamp в milliseconds)" example(1708700000000)
-// @Param to_date query int false "Дата окончания (timestamp в milliseconds)" example(1708790000000)
+// @Param from_date query string false "Дата начала (time.RFC3339)" example(2006-01-02T15:04:05+00:00)
+// @Param to_date query string false "Дата окончания (time.RFC3339)" example(2006-01-02T15:04:05+00:00)
 // @Success 200 {object} domains.SuccessGet "Успешный ответ"
 // @Failure 400 {object} domains.ErrorBody "Ошибка валидации запроса"
 // @Failure 500 {object} domains.ErrorBody "Внутренняя ошибка сервера"
@@ -45,27 +46,33 @@ func (h *Handler) GetMetrics(c *gin.Context) {
 	}
 
 	if fromDate := c.Query("from_date"); fromDate != "" {
-		uint64Value, err := strconv.ParseUint(fromDate, 10, 64)
+		//int64Value, err := strconv.ParseInt(fromDate, 10, 64)
+		//if err != nil {
+		//	msg := "Could not parse from_date from query string"
+		//	log.WithError(err).Error(msg)
+		//	c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
+		//	return
+		//}
+		//filters.FromDate = &int64Value
+		t, err := time.Parse(time.RFC3339, fromDate)
 		if err != nil {
-			msg := "Could not parse from_date from query string"
+			msg := "Could not parse from date"
 			log.WithError(err).Error(msg)
 			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
 			return
 		}
-		uintValue := uint(uint64Value)
-		filters.FromDate = uintValue
+		filters.FromDate = t
 	}
 
 	if toDate := c.Query("to_date"); toDate != "" {
-		uint64Value, err := strconv.ParseUint(toDate, 10, 64)
+		t, err := time.Parse(time.RFC3339, toDate)
 		if err != nil {
-			msg := "Could not parse to_date from query string"
+			msg := "Could not parse to date"
 			log.WithError(err).Error(msg)
 			c.JSON(http.StatusBadRequest, domains.ErrorBody{Message: msg})
 			return
 		}
-		uintValue := uint(uint64Value)
-		filters.ToDate = uintValue
+		filters.ToDate = t
 	}
 
 	if err := validator.New().Struct(&filters); err != nil {

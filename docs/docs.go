@@ -46,16 +46,16 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "example": 1708700000000,
-                        "description": "Дата начала (timestamp в milliseconds)",
+                        "type": "string",
+                        "example": "2006-01-02T15:04:05Z",
+                        "description": "Дата начала (time.RFC3339)",
                         "name": "from_date",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "example": 1708790000000,
-                        "description": "Дата окончания (timestamp в milliseconds)",
+                        "type": "string",
+                        "example": "2006-01-02T15:04:05Z",
+                        "description": "Дата окончания (time.RFC3339)",
                         "name": "to_date",
                         "in": "query"
                     }
@@ -163,7 +163,7 @@ const docTemplate = `{
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "Authorization.",
             "in": "header"
         }
     }

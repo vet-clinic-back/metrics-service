@@ -45,7 +45,6 @@ func startMockClient() {
 				Output1: rand.Float64() * 20,
 				Output2: rand.Float64() * 20,
 			},
-			Timestamp: time.Now().Format(time.RFC3339),
 		}
 
 		if err := encoder.Encode(metrics); err != nil {

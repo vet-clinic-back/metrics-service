@@ -26,5 +26,14 @@ func (m *MetricService) GetMetrics(ctx context.Context, filters domains.MetricsF
 		return []domains.Metrics{}, ErrNoDeviceID
 	}
 
-	return m.storage.MetricStorage.GetMetrics(ctx, filters)
+	metrics, err := m.storage.MetricStorage.GetMetrics(ctx, filters)
+	if err != nil {
+		return []domains.Metrics{}, err
+	}
+
+	if metrics == nil {
+		metrics = []domains.Metrics{}
+	}
+
+	return metrics, nil
 }
