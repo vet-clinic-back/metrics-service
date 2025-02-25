@@ -2,9 +2,11 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/vet-clinic-back/metrics-service/internal/domains"
+	logging "github.com/vet-clinic-back/metrics-service/pkg/logger"
 )
 
 /*
@@ -23,8 +25,9 @@ created_at BIGINT DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT
 
 func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]domains.Metrics, error) {
 	p.MustEnsureConn()
+
 	sq := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	// log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
+	log := logging.GetLogger().WithField("op", "Postgres.GetMetrics")
 
 	dateTrunc := fmt.Sprintf("DATE_TRUNC('%s', TO_TIMESTAMP(created_at / 1000))", f.Interval)
 
@@ -58,7 +61,12 @@ func (p *Postgres) GetMetrics(ctx context.Context, f domains.MetricsFilters) ([]
 	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			log.WithError(err).Error("Error closing rows")
+		}
+	}(rows)
 
 	var metrics []domains.Metrics
 	for rows.Next() {
