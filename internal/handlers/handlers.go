@@ -36,9 +36,9 @@ func (h *Handler) Run(ctx context.Context, a *adapters.Adapters) {
 	defer cancel()
 
 	g.Go(func() error {
-		log.Info("shutting down postgres...")
+		log.Info("shutting down http...")
 
-		if err := a.Postgres.Shutdown(tCtx); err != nil {
+		if err := a.HTTPAdapter.Shutdown(tCtx); err != nil {
 			return fmt.Errorf("failed to shutdown HTTP adapter: %w", err)
 		}
 
